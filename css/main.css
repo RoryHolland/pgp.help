@@ -2808,7 +2808,7 @@ pre code {
   }
 
   .col-lg-9 {
-    width: 75%;
+    width: 100%;
   }
 
   .col-lg-8 {
@@ -5415,7 +5415,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 
 .navbar-brand {
-  float: left;
+  text-align: center;
   padding: 19.5px 15px;
   font-size: 19px;
   line-height: 21px;

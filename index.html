@@ -1,21 +1,19 @@
-<!DOCTYPE html>
-<html lang="en" ng-app="pgpApp" ng-csp>
-  <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<html lang="en" ng-app="pgpApp" ng-csp="" class="ng-scope"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!--
     This is the Content-Security-Policy header:
-    See https://pgp.help/#/intro for more info
+    See https://pgp.tools/#/intro for more info
     -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self';"> 
     
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="pgp.help is a modern client-side tool for encrypting and decrypting PGP / OpenPGP / GnuPG messages."/>
-    <meta name="author" content=""/>
-    <link rel="icon" href="./favicon.png" type="image/png" sizes="32x32"/>
-    <title>pgp.help - Modern javascript client-side PGP encryption and decryption tool</title>
+    <meta name="description" content="Encrypt text using pgp.tools, the simplest way to encrypt using pgp / gpg">
+    <meta name="author" content="">
+    <link rel="icon" href="./favicon.png" type="image/png" sizes="32x32">
+    <title>Encrypt text using pgp.tools</title>
 
     <link rel="stylesheet" href="css/main.css">
   </head>
@@ -30,105 +28,156 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" ui-sref="key({key:''})">pgp.help</a>
+          <a class="navbar-brand" ui-sref="key({key:''})" href="unsafe:file:///home/rory/repos/pgp.tools/index.html#/">pgp.tools</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse bs-navbar-collapse">
           <ul class="nav navbar-nav pull-right">
             <!-- <li class="active"><a data-toggle="tab" href="#home" id="tab-home">Home</a></li> -->
-            <li><a ui-sref="intro">Intro</a></li>
-            <li><a href="https://github.com/Gaff/pgp.help/blob/master/README.md">Help</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </header>
 
-    <div class="container" ng-controller="KeyListCtrl">
+    <div class="container ng-scope" ng-controller="KeyListCtrl">
       <div class="row work">
-        <div class="col-lg-9 active" ng-cloak>
-          <div ui-view></div>
+        <div class="col-lg-9 active">
+          <!-- uiView: --><!-- uiView: --><div ui-view="" class="ng-scope"><!-- <pre>{{$stateParams}}</pre> -->
+<form action="/" class="form-horizontal ng-pristine ng-valid ng-scope" method="get">
+  <fieldset>
+    
+
+    <div class="form-group" ng-class="[smartfade, {'has-error': pgperror}]" ng-show="isNewKey()">
+      <label class="col-lg-2 control-label ng-binding" for="pgppub">Public Key</label>
+      <div class="col-lg-10 controls">
+        <textarea class="form-control autoselectall ng-pristine ng-valid ng-empty ng-touched" focus-on="pgppub" rows="4" spellcheck="false" placeholder="Paste PGP key here." ng-model="rawkey" ng-model-options="{debounce:500}" ng-change="loadKey()" style=""></textarea>
+      </div>
+    </div>
+    <div ng-show="!isNewKey()" class="ng-hide">
+      <div class="form-group">
+        <label class="col-lg-2 control-label" for="username">Username</label>
+        <div class="col-lg-5 controls">
+          <div class="input-append">
+            <input class="form-control" type="text" readonly="readonly" ng-value="getUser(key)" value="">
+          </div>
         </div>
-        <div class="col-lg-3" ng-cloak>
-          <div class="panel panel-default">
-            <div class=panel-heading>New key</div>
-            <div class="list-group">
-               <a class="a-like list-group-item " ui-sref-active="active"
-                  ui-sref="import({'private':false})">
-                  Add new key...
-               </a>
-            </div>
-          </div>          
-          <div class="jumbotron" ui-sref-active="hidden" collapse="skipintro">
-            <p>New to PGP?</p>
-            <p>Click here to get started.</p>
-            <p><a ui-sref="intro" class="btn btn-primary btn-lg">Learn More</a></p>
+        <label class="col-lg-2 control-label" for="keyId">Key ID</label>
+        <div class="col-lg-3 controls">
+          <div class="input-append">
+            <input class="form-control autoselectall" type="text" readonly="readonly" ng-value="getKeyId(key)" value="">
           </div>
-          <div class="panel panel-default" collapse="!workstarted">
-            <div class=panel-heading>Public keys</div>
-            <div class="list-group">
-               <a class="list-group-item" ng-repeat="key in publicKeys()" ui-sref="key({'key':getFingerprint(key), 'private':false})"
-                  ui-sref-active="active">{{getUser(key)}}</a>
-            </div>
+        </div>
+      </div>
+      <div class="form-group ng-hide" ng-show="isPrivateKey() &amp;&amp; !isNewKey()">
+        <label class="col-lg-2 control-label" for="passphrase">Password</label>
+        <div class="col-lg-10 controls">
+          <div class="input-append" ng-class="{'has-error':passworderror}">
+            <input type="password" class="form-control ng-pristine ng-untouched ng-valid ng-empty" focus-on="passphrase" ng-model-options="{debounce:500}" placeholder="Password for private key" ng-model="password" ng-change="applyPassword()" ng-readonly="isDecryptedKey()">
           </div>
-          <div class="panel panel-default" ng-show="persist || workstarted">
-            <div class=panel-heading ng-click="newidentityopts=!newidentityopts">
-              My identities
-              <span class="pull-right clickable"><i class="glyphicon" ng-class="{'glyphicon-chevron-up':newidentityopts, 'glyphicon-chevron-down':!newidentityopts}"></i></span>
-            </div>
-            <div class="list-group" >
-               <a class="list-group-item a-like" ui-sref-active="active" ng-show="newidentityopts"
-                  ui-sref="generate">
-                  Generate new identity...
-               </a>
-               <a class="list-group-item a-like" ui-sref-active="active"
-                  ng-show="newidentityopts" ui-sref="import({'private':true})">
-                  Import private key...
-               </a>
-               <br ng-show="privateKeys().length > 0 && newidentityopts"/>
-               <a class="list-group-item" ng-repeat="key in privateKeys()" ui-sref="key({'key':getFingerprint(key), 'private':true})"
-                  ui-sref-active="active">
-                  {{getUser(key)}}
-              </a>
+        </div>
+      </div>
+      <div class="form-group" ng-click="showdetails = !showdetails">
+        <a class="col-lg-10 col-lg-offset-2 ng-binding">Show key details
+          <span class="pull-left"><i class="glyphicon glyphicon-chevron-down" ng-class="{'glyphicon-chevron-up':showdetails, 'glyphicon-chevron-down':!showdetails}"></i>
+          </span>
+        </a>
+
+      </div>
+      <div ng-show="showdetails" class="ng-hide">
+        <div class="form-group">
+          <label class="col-lg-2 control-label" for="fingerprint">Fingerprint</label>
+          <div class="col-lg-10 controls">
+            <div class="input-append">
+              <input class="form-control autoselectall" type="text" readonly="readonly" ng-value="getFingerprint(key)" value="">
             </div>
           </div>
-          <div class="panel panel-default">
-            <div class=panel-heading>
-              Settings
-            </div>
-            <div class="panel-body">
-              <div class="form-group row" ng-mouseenter="persist_mo=true" ng-mouseleave="persist_mo=false">
-                <label class="control-label col-sm-7">Store key data</label>
-                <div class="controls col-sm-5 pull-right">
-                  <div class="btn-group btn-group-justified btn-group-horizontal">
-                    <div class="btn btn-xs btn-default" ng-class="{'btn-primary': persist }" ng-click="persist=!persist">ON</div>
-                    <div class="btn btn-xs btn-default" ng-class="{'btn-primary': !persist }" ng-click="persist=!persist">OFF</div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-2 control-label">Public Key</label>
+          <div class="col-lg-10 controls">
+            <textarea class="form-control autoselectall ng-binding" id="dest" readonly="readonly" rows="8" placeholder="Raw PGP key."></textarea>
+          </div>
+        </div>
+        <div class="forum-group row">
+          <div class="col-lg-10 col-lg-offset-2">
+            <a class="btn btn-default" download="publickey.txt" ng-href="data:text/plain;charset=utf-16le," href="data:text/plain;charset=utf-16le,">Save As</a>
+            <a class="btn btn-default ng-hide" ng-show="isPrivateKey()" data-toggle="modal" data-target="#keyExport">Export Private Key</a>
+            <a class="btn btn-default ng-hide" ng-show="workstarted" ng-click="deleteKey()">Delete Key</a>
+            <div class="pull-right">(<a ui-sref="permalink({pgp:rawkey})" href="unsafe:file:///home/rory/repos/pgp.tools/index.html#/permalink">permalink</a>)</div>
+          </div>
+          <!-- Modals -->
+          <div id="keyExport" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-lg">
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">×</button>
+                  <h4 class="modal-title">Export Key Data</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="panel panel-warning">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Do not share this data with anyone!</h3>
+                    </div>
+                    <div class="panel-body">
+                      <p>This data should be used to backup the private key, and import it to other pgp apps that you own.</p>
+                      <p>Do NOT give this data to anyone as it will allow them to read your messages, or steal your identity!</p>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-lg-2 control-label">Private Key</label>
+                    <div class="col-lg-10 controls">
+                      <textarea class="form-control autoselectall ng-binding" id="dest" readonly="readonly" rows="8" placeholder="Encrypted text will appear here."></textarea>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <alert type="danger" ng-show="isStored() && isStorageSafe()" ng-cloak>This webpage has been loaded from a file. Stored data can be seen by any other web pages loaded from files on your system. It is not recomended you persist data in this configuration.<a ui-sref="intro">Why?</a></alert>
-              <alert type="warning" ng-show="!persist && unstoredPrivateKeys" ng-cloak>Private key data has not been saved anywhere.</alert>
-              <div class="form-group row" ng-show="!persist && isStored()" ng-cloak>
-                <label class="control-label col-sm-7" >Delete all data?</label>
-                <div class="controls col-sm-5 pull-right">
-                  <button class="btn btn-xs btn-block btn-danger" ng-click="purgeKeys()">Delete!</button>
+                <div class="modal-footer">
+                  <a class="btn btn-default" download="privatekey.txt" ng-href="data:text/plain;charset=utf-16le,undefined" href="data:text/plain;charset=utf-16le,undefined">Save As</a>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
           </div>
+          <!-- Modals finish here -->
         </div>
+      </div>
+    </div>
+    <hr>
+    <div class="form-group">
+      <label class="col-lg-2 control-label" for="src">Message</label>
+      <div class="col-lg-10 controls" ng-show="!isPrivateKey()">
+        <textarea class="form-control ng-pristine ng-untouched ng-valid ng-empty" focus-on="message" rows="8" spellcheck="false" placeholder="Type your mesage here." ng-model="message" ng-model-options="{debounce:500}" ng-change="encryptMessage()"></textarea>
+      </div>
+      <div class="col-lg-10 controls ng-hide" ng-show="isPrivateKey()" ng-class="{'has-error': pmessageerror}">
+        <textarea class="form-control autoselectall ng-pristine ng-untouched ng-valid ng-empty" focus-on="pmessage" rows="8" spellcheck="false" placeholder="Paste encrypted message here." ng-model="pmessage" ng-model-options="{debounce:500}" ng-change="decryptMessage()"></textarea>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label" for="dest">Result</label>
+      <div class="col-lg-10 controls">
+        <textarea class="form-control autoselectall ng-binding" id="dest" readonly="readonly" rows="8" placeholder="Encrypted text will appear here."></textarea>
+        <div class="checkbox ng-hide" ng-show="(resulttext &amp;&amp; !isPrivateKey() || showdetails)">
+          <label><input type="checkbox" ng-model="applyBlockquote" class="ng-pristine ng-untouched ng-valid ng-empty">Markdown blockquote (for reddit etc)</label>
+        </div>       
+        <div class="pull-right ng-hide" ng-show="resulttext &amp;&amp; mailit()">(<a ng-href="" href="unsafe:file:///home/rory/repos/pgp.tools/null">send in email</a>)</div>
+        <div>
+          <span id="hint_to">&nbsp;</span>&nbsp;
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form></div>
+        </div>
+        
 
       </div>
 
-      <footer class="footer">
-        <hr/>
-        <p>&copy; pgp.help 2015
-          <span class="pull-right">Powered by <a href="http://pages.github.com">GitHub Pages</a> &nbsp; <a href="https://github.com/Gaff/pgp.help/tree/gh-pages">GitHub Repository</a> &nbsp; <a href="https://github.com/Gaff/pgp.help/archive/gh-pages.zip">Download .zip</a></span>
-        </p>
-      </footer>
 
     </div> <!-- /container -->
 
     <script src="js/plugins.js"></script>
 
     <script src="js/main.js"></script>
-  </body>
-</html>
+  
+
+</body></html>
